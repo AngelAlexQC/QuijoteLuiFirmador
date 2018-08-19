@@ -5,7 +5,7 @@ Aplica para firmar facturas, comprobantes de retención, guías de remisión, no
 de crédito y notas de débito de Ecuador.
 
 
-### Para compilar y generar el archivo QuijoteLuiFirmador-1.2.jar
+### Para compilar y generar el archivo QuijoteLuiFirmador-1.3.jar
 ```
 $ ant
 
