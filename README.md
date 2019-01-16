@@ -14,3 +14,6 @@ $ ant
 ```
 $ mvn install:install-file -Dfile=./dist/QuijoteLuiFirmador-1.3.jar -DgroupId=com.quijotelui.firmador -DartifactId=QuijoteLuiFirmador -Dversion=1.3 -Dpackaging=jar
 ```
+
+#### Documentación
+https://www.allku.expert/firmar-un-comprobante-electronico-segun-los-parametros-del-sri-en-ecuador/
