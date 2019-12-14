@@ -50,6 +50,12 @@ import es.mityc.javasign.pkstore.CertStoreException;
 import es.mityc.javasign.pkstore.IPKStoreManager;
 import es.mityc.javasign.pkstore.keystore.KSStore;
 import java.io.FileInputStream;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 
 /**
@@ -102,61 +108,98 @@ public abstract class GenericXMLSignature {
      */
     protected boolean execute() {
 
-        // Obtencion del gestor de claves
-        IPKStoreManager storeManager = getPKStoreManager();
-        if (storeManager == null) {
-            System.err.println("El gestor de claves no se ha obtenido correctamente.");
-            return false;
-        }
-
-        // Obtencion del certificado para firmar. Utilizaremos el primer
-        // certificado del almacen.
-        X509Certificate certificate = getFirstCertificate(storeManager);
-        if (certificate == null) {
-            //System.err.println("No existe ningún certificado para firmar.");
-            System.err.println("No existe ningún certificado para firmar");
-            return false;
-        }
-
-        // Obtención de la clave privada asociada al certificado
-        PrivateKey privateKey;
         try {
-            privateKey = storeManager.getPrivateKey(certificate);
-        } catch (CertStoreException e) {
-            System.err.println("Error al acceder al almacén.");
-            return false;
+
+            // Obtencion del gestor de claves
+            IPKStoreManager storeManager = null;
+            String aliaskey = null;
+            KeyStore ks = null;
+            String store = "pkcs12";
+
+            ks = KeyStore.getInstance(store);
+            if (store == "Windows-MY") {
+                ks.load(this.getClass().getResourceAsStream(PKCS12_RESOURCE), PKCS12_PASSWORD.toCharArray());
+                ks.load(null, null);
+                storeManager = new KSStore(ks, new PassStoreKS(PKCS12_PASSWORD));
+            } else if (store.equals("pkcs12")) {
+                ks.load(new FileInputStream(PKCS12_RESOURCE), PKCS12_PASSWORD.toCharArray());
+                //ks.load(this.getClass().getResourceAsStream(PKCS12_RESOURCE), PKCS12_PASSWORD.toCharArray());
+                ks.load(null, null);
+                storeManager = new KSStore(ks, new PassStoreKS(PKCS12_PASSWORD));
+            }
+
+            if (storeManager == null) {
+                System.err.println("El gestor de claves no se ha obtenido correctamente.");
+                return false;
+            }
+
+            TokensValidos tokenID = null;
+            if (tokenID == null) {
+                tokenID = TokensValidos.valueOf("BCE_IKEY2032");
+            }
+            aliaskey = seleccionarCertificado(ks, tokenID);
+
+            // Obtencion del certificado para firmar. Utilizaremos el primer
+            // certificado del almacen.
+
+            X509Certificate certificate = (X509Certificate) ks.getCertificate(aliaskey);
+            if (certificate == null) {
+                //System.err.println("No existe ningún certificado para firmar.");
+                System.err.println("No existe ningún certificado para firmar");
+                return false;
+            }
+
+            // Obtención de la clave privada asociada al certificado
+            PrivateKey privateKey = null;
+            try {
+                KeyStore tmpKs = ks;
+                privateKey = (PrivateKey) tmpKs.getKey(aliaskey, PKCS12_PASSWORD.toCharArray());
+            } catch (UnrecoverableKeyException ex) {
+                Logger.getLogger(GenericXMLSignature.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            // Obtención del provider encargado de las labores criptográficas
+            Provider provider = storeManager.getProvider(certificate);
+
+            /*
+            * Creación del objeto que contiene tanto los datos a firmar como la
+            * configuración del tipo de firma
+             */
+            DataToSign dataToSign = createDataToSign();
+
+            /*
+            * Creación del objeto encargado de realizar la firma
+             */
+            FirmaXML firma = new FirmaXML();
+
+            // Firmamos el documento
+            Document docSigned = null;
+            try {
+                Object[] res = firma.signFile(certificate, dataToSign, privateKey, provider);
+                docSigned = (Document) res[0];
+            } catch (Exception ex) {
+                System.err.println("Error realizando la firma");
+                ex.printStackTrace();
+                return false;
+            }
+
+            // Guardamos la firma a un fichero en el home del usuario
+            String filePath = OUTPUT_DIRECTORY + File.separatorChar + getSignatureFileName();
+            System.out.println("Firma salvada en en: " + filePath);
+            saveDocumentToFile(docSigned, filePath);
+            return true;
+        } catch (KeyStoreException ex) {
+            Logger.getLogger(GenericXMLSignature.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(GenericXMLSignature.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(GenericXMLSignature.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (CertificateNotYetValidException ex) {
+            Logger.getLogger(GenericXMLSignature.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (CertificateException ex) {
+            Logger.getLogger(GenericXMLSignature.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        // Obtención del provider encargado de las labores criptográficas
-        Provider provider = storeManager.getProvider(certificate);
-
-        /*
-         * Creación del objeto que contiene tanto los datos a firmar como la
-         * configuración del tipo de firma
-         */
-        DataToSign dataToSign = createDataToSign();
-
-        /*
-         * Creación del objeto encargado de realizar la firma
-         */
-        FirmaXML firma = new FirmaXML();
-
-        // Firmamos el documento
-        Document docSigned = null;
-        try {
-            Object[] res = firma.signFile(certificate, dataToSign, privateKey, provider);
-            docSigned = (Document) res[0];
-        } catch (Exception ex) {
-            System.err.println("Error realizando la firma");
-            ex.printStackTrace();
-            return false;
-        }
-
-        // Guardamos la firma a un fichero en el home del usuario
-        String filePath = OUTPUT_DIRECTORY + File.separatorChar + getSignatureFileName();
-        System.out.println("Firma salvada en en: " + filePath);
-        saveDocumentToFile(docSigned, filePath);
-        return true;
+        return false;
     }
 
     /**
@@ -288,48 +331,6 @@ public abstract class GenericXMLSignature {
 
     /**
      * <p>
-     * Devuelve el gestor de claves que se va a utilizar
-     * </p>
-     *
-     * @return El gestor de claves que se va a utilizar</p>
-     */
-    private IPKStoreManager getPKStoreManager() {
-        IPKStoreManager storeManager = null;
-        String store = "pkcs12";
-        try {
-            KeyStore ks = KeyStore.getInstance(store);
-            if (store == "Windows-MY") {
-                ks.load(this.getClass().getResourceAsStream(PKCS12_RESOURCE), PKCS12_PASSWORD.toCharArray());
-                ks.load(null, null);
-                storeManager = new KSStore(ks, new PassStoreKS(PKCS12_PASSWORD));
-            } else if (store.equals("pkcs12")) {
-                ks.load(new FileInputStream(PKCS12_RESOURCE), PKCS12_PASSWORD.toCharArray());
-                //ks.load(this.getClass().getResourceAsStream(PKCS12_RESOURCE), PKCS12_PASSWORD.toCharArray());                
-                ks.load(null, null);
-                storeManager = new KSStore(ks, new PassStoreKS(PKCS12_PASSWORD));
-            }
-        } catch (KeyStoreException ex) {
-            System.err.println("No se puede generar KeyStore PKCS12");
-            ex.printStackTrace();
-            //System.exit(-1);
-        } catch (NoSuchAlgorithmException ex) {
-            System.err.println("No se puede generar KeyStore PKCS12");
-            ex.printStackTrace();
-            //System.exit(-1);
-        } catch (CertificateException ex) {
-            System.err.println("No se puede generar KeyStore PKCS12");
-            ex.printStackTrace();
-            //System.exit(-1);
-        } catch (IOException ex) {
-            System.err.println("No se puede generar KeyStore PKCS12");
-            ex.printStackTrace();
-            //System.exit(-1);
-        }
-        return storeManager;
-    }
-
-    /**
-     * <p>
      * Recupera el primero de los certificados del almacén.
      * </p>
      *
@@ -356,6 +357,76 @@ public abstract class GenericXMLSignature {
 
         X509Certificate certificate = certs.get(0);
         return certificate;
+    }
+
+    public static String seleccionarCertificado(KeyStore keyStore, TokensValidos tokenSeleccionado) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateExpiredException, CertificateNotYetValidException, CertificateException {
+        String aliasSeleccion = null;
+        X509Certificate certificado = null;
+        Enumeration<String> nombres = keyStore.aliases();
+        while (nombres.hasMoreElements()) {
+            String aliasKey = nombres.nextElement();
+            certificado = (X509Certificate) keyStore.getCertificate(aliasKey);
+
+            X500NameGeneral x500emisor = new X500NameGeneral(certificado.getIssuerDN().getName());
+            X500NameGeneral x500sujeto = new X500NameGeneral(certificado.getSubjectDN().getName());
+
+            if (tokenSeleccionado.equals(TokensValidos.SD_BIOPASS) || (tokenSeleccionado.equals(TokensValidos.SD_EPASS3000) && x500emisor.getCN().contains(AutoridadesCertificantes.SECURITY_DATA.getCn()))) {
+
+                if (AutoridadesCertificantes.SECURITY_DATA.getO().equals(x500emisor.getO()) && AutoridadesCertificantes.SECURITY_DATA.getC().equals(x500emisor.getC()) && AutoridadesCertificantes.SECURITY_DATA.getO().equals(x500sujeto.getO()) && AutoridadesCertificantes.SECURITY_DATA.getC().equals(x500sujeto.getC())) {
+
+                    if (certificado.getKeyUsage()[0] || certificado.getKeyUsage()[1]) {
+                        aliasSeleccion = aliasKey;
+                        break;
+                    }
+                }
+                continue;
+            }
+            if (tokenSeleccionado.equals(TokensValidos.BCE_ALADDIN) || (tokenSeleccionado.equals(TokensValidos.BCE_IKEY2032) && x500emisor.getCN().contains(AutoridadesCertificantes.BANCO_CENTRAL.getCn()))) {
+
+                if (x500emisor.getO().contains(AutoridadesCertificantes.BANCO_CENTRAL.getO()) && AutoridadesCertificantes.BANCO_CENTRAL.getC().equals(x500emisor.getC()) && x500sujeto.getO().contains(AutoridadesCertificantes.BANCO_CENTRAL.getO()) && AutoridadesCertificantes.BANCO_CENTRAL.getC().equals(x500sujeto.getC())) {
+
+                    if (certificado.getKeyUsage()[0] || certificado.getKeyUsage()[1]) {
+                        aliasSeleccion = aliasKey;
+                        break;
+                    }
+                }
+                continue;
+            }
+            if (tokenSeleccionado.equals(TokensValidos.ANF1) && x500emisor.getCN().contains(AutoridadesCertificantes.ANF.getCn())) {
+
+                if (AutoridadesCertificantes.ANF.getO().equals(x500emisor.getO()) && AutoridadesCertificantes.ANF.getC().equals(x500emisor.getC()) && AutoridadesCertificantes.ANF.getC().toLowerCase().equals(x500sujeto.getC())) {
+
+                    if (certificado.getKeyUsage()[0] || certificado.getKeyUsage()[1]) {
+                        aliasSeleccion = aliasKey;
+                        break;
+                    }
+                }
+                continue;
+            }
+            if (tokenSeleccionado.equals(TokensValidos.ANF1) && x500emisor.getCN().contains(AutoridadesCertificantes.ANF_ECUADOR_CA1.getCn())) {
+
+                if (AutoridadesCertificantes.ANF_ECUADOR_CA1.getO().equals(x500emisor.getO()) && AutoridadesCertificantes.ANF_ECUADOR_CA1.getC().equals(x500emisor.getC()) && AutoridadesCertificantes.ANF_ECUADOR_CA1.getC().equals(x500sujeto.getC())) {
+
+                    if (certificado.getKeyUsage()[0] || certificado.getKeyUsage()[1]) {
+                        aliasSeleccion = aliasKey;
+                        break;
+                    }
+                }
+                continue;
+            }
+            if (tokenSeleccionado.equals(TokensValidos.KEY4_CONSEJO_JUDICATURA) && x500emisor.getCN().contains(AutoridadesCertificantes.CONSEJO_JUDICATURA.getCn())) {
+
+                if (x500emisor.getO().contains(AutoridadesCertificantes.CONSEJO_JUDICATURA.getO()) && AutoridadesCertificantes.CONSEJO_JUDICATURA.getC().equals(x500emisor.getC()) && AutoridadesCertificantes.CONSEJO_JUDICATURA.getC().equals(x500sujeto.getC())) {
+
+                    if (certificado.getKeyUsage()[0] || certificado.getKeyUsage()[1]) {
+                        aliasSeleccion = aliasKey;
+
+                        break;
+                    }
+                }
+            }
+        }
+        return aliasSeleccion;
     }
 
 }
