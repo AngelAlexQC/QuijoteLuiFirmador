@@ -12,7 +12,7 @@ $ ant
 ```
 ### Para subir al repositorio Maven Local
 ```
-$ mvn install:install-file -Dfile=./dist/QuijoteLuiFirmador-1.4.jar -DgroupId=com.quijotelui.firmador -DartifactId=QuijoteLuiFirmador -Dversion=1.3 -Dpackaging=jar
+$ mvn install:install-file -Dfile=./dist/QuijoteLuiFirmador-1.4.jar -DgroupId=com.quijotelui.firmador -DartifactId=QuijoteLuiFirmador -Dversion=1.4 -Dpackaging=jar
 ```
 
 #### Documentación
