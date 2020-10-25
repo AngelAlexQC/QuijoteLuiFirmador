@@ -1,6 +1,6 @@
 package com.quijotelui.firmador;
 
-public enum TokensValidos {
+public enum TokensAvailables {
     ANF1("ANF - Certificado Exportado"),
     ANF_TOKEN("ANF - Plug & Sign"),
     BCE_IKEY2032("BCE - iKey2032"),
@@ -11,7 +11,7 @@ public enum TokensValidos {
 
     String id;
 
-    TokensValidos(String modelo) {
+    TokensAvailables(String modelo) {
         this.id = modelo;
     }
 
@@ -27,8 +27,8 @@ public enum TokensValidos {
         return getId();
     }
 
-    public static TokensValidos obtenerToken(String modelo) {
-        for (TokensValidos tokenValido : values()) {
+    public static TokensAvailables getToken(String modelo) {
+        for (TokensAvailables tokenValido : values()) {
 
             if (tokenValido.name().equals(modelo)) {
                 return tokenValido;

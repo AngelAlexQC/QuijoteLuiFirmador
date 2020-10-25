@@ -31,7 +31,22 @@ public class Main {
         
         PKCS12_PASSWORD = new String("clave_certificado");
 
-        xadesBesFirma.firmar(archivo.getAbsolutePath(), archivo.getName(),
-                urlOutArchivo, PKCS12_RESOURCE, PKCS12_PASSWORD);
+        /*
+        Para firmar con un certificado emitido por le BCE
+         */
+        xadesBesFirma.sign(archivo,
+                urlOutArchivo,
+                PKCS12_RESOURCE,
+                PKCS12_PASSWORD,
+                TokensAvailables.BCE_IKEY2032);
+
+        /*
+        Para firmar con un certificado emitido por le Security Data
+         */
+        xadesBesFirma.sign(archivo,
+                urlOutArchivo,
+                PKCS12_RESOURCE,
+                PKCS12_PASSWORD,
+                TokensAvailables.SD_EPASS3000);
     }
 }

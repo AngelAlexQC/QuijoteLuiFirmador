@@ -106,7 +106,7 @@ public abstract class GenericXMLSignature {
      * <code>getSignFileName</code>
      * </p>
      */
-    protected boolean execute() {
+    protected boolean execute(TokensAvailables token) {
 
         try {
 
@@ -133,18 +133,13 @@ public abstract class GenericXMLSignature {
                 return false;
             }
 
-            TokensValidos tokenID = null;
-            if (tokenID == null) {
-                tokenID = TokensValidos.valueOf("BCE_IKEY2032");
-            }
-            aliaskey = seleccionarCertificado(ks, tokenID);
+            aliaskey = selectCertificate(ks, token);
 
             // Obtencion del certificado para firmar. Utilizaremos el primer
             // certificado del almacen.
 
             X509Certificate certificate = (X509Certificate) ks.getCertificate(aliaskey);
             if (certificate == null) {
-                //System.err.println("No existe ningún certificado para firmar.");
                 System.err.println("No existe ningún certificado para firmar");
                 return false;
             }
@@ -359,7 +354,7 @@ public abstract class GenericXMLSignature {
         return certificate;
     }
 
-    public static String seleccionarCertificado(KeyStore keyStore, TokensValidos tokenSeleccionado) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateExpiredException, CertificateNotYetValidException, CertificateException {
+    public static String selectCertificate(KeyStore keyStore, TokensAvailables tokenSelected) throws KeyStoreException {
         String aliasSeleccion = null;
         X509Certificate certificado = null;
         Enumeration<String> nombres = keyStore.aliases();
@@ -370,9 +365,43 @@ public abstract class GenericXMLSignature {
             X500NameGeneral x500emisor = new X500NameGeneral(certificado.getIssuerDN().getName());
             X500NameGeneral x500sujeto = new X500NameGeneral(certificado.getSubjectDN().getName());
 
-            if (tokenSeleccionado.equals(TokensValidos.SD_BIOPASS) || (tokenSeleccionado.equals(TokensValidos.SD_EPASS3000) && x500emisor.getCN().contains(AutoridadesCertificantes.SECURITY_DATA.getCn()))) {
+            String cn = x500emisor.getCN();
+            String a = AutoridadesCertificantes.SECURITY_DATA.getCn();
 
-                if (AutoridadesCertificantes.SECURITY_DATA.getO().equals(x500emisor.getO()) && AutoridadesCertificantes.SECURITY_DATA.getC().equals(x500emisor.getC()) && AutoridadesCertificantes.SECURITY_DATA.getO().equals(x500sujeto.getO()) && AutoridadesCertificantes.SECURITY_DATA.getC().equals(x500sujeto.getC())) {
+            Boolean r = cn.contains(a);
+
+            if ((tokenSelected.equals(TokensAvailables.SD_BIOPASS)
+                    || tokenSelected.equals(TokensAvailables.SD_EPASS3000))
+                    && (x500emisor.getCN().contains(AutoridadesCertificantes.SECURITY_DATA.getCn())
+                    || x500emisor.getCN().contains(AutoridadesCertificantes.SECURITY_DATA_SUB_1.getCn()))) {
+                         if (AutoridadesCertificantes.SECURITY_DATA.getO().equals(x500emisor.getO())
+                                 && AutoridadesCertificantes.SECURITY_DATA.getC().equals(x500emisor.getC())
+                                 && AutoridadesCertificantes.SECURITY_DATA.getO().equals(x500sujeto.getO())
+                                 && AutoridadesCertificantes.SECURITY_DATA.getC().equals(x500sujeto.getC())) {
+                             if (certificado.getKeyUsage()[0]) {
+                                     aliasSeleccion = aliasKey;
+                                     break;
+                                   }
+                             }
+                         if (AutoridadesCertificantes.SECURITY_DATA_SUB_1.getO().equals(x500emisor.getO())
+                                 && AutoridadesCertificantes.SECURITY_DATA_SUB_1.getC().equals(x500emisor.getC())
+                                 && AutoridadesCertificantes.SECURITY_DATA_SUB_1.getO().equals(x500sujeto.getO())
+                                 && AutoridadesCertificantes.SECURITY_DATA_SUB_1.getC().equals(x500sujeto.getC())) {
+                             if (certificado.getKeyUsage()[0]) {
+                                 aliasSeleccion = aliasKey;
+                                 break;
+                             }
+                         }
+                         continue;
+            }
+            if (tokenSelected.equals(TokensAvailables.BCE_ALADDIN)
+                    || (tokenSelected.equals(TokensAvailables.BCE_IKEY2032)
+                    && x500emisor.getCN().contains(AutoridadesCertificantes.BANCO_CENTRAL.getCn()))) {
+
+                if (x500emisor.getO().contains(AutoridadesCertificantes.BANCO_CENTRAL.getO())
+                        && AutoridadesCertificantes.BANCO_CENTRAL.getC().equals(x500emisor.getC())
+                        && x500sujeto.getO().contains(AutoridadesCertificantes.BANCO_CENTRAL.getO())
+                        && AutoridadesCertificantes.BANCO_CENTRAL.getC().equals(x500sujeto.getC())) {
 
                     if (certificado.getKeyUsage()[0] || certificado.getKeyUsage()[1]) {
                         aliasSeleccion = aliasKey;
@@ -381,20 +410,12 @@ public abstract class GenericXMLSignature {
                 }
                 continue;
             }
-            if (tokenSeleccionado.equals(TokensValidos.BCE_ALADDIN) || (tokenSeleccionado.equals(TokensValidos.BCE_IKEY2032) && x500emisor.getCN().contains(AutoridadesCertificantes.BANCO_CENTRAL.getCn()))) {
+            if (tokenSelected.equals(TokensAvailables.ANF1)
+                    && x500emisor.getCN().contains(AutoridadesCertificantes.ANF.getCn())) {
 
-                if (x500emisor.getO().contains(AutoridadesCertificantes.BANCO_CENTRAL.getO()) && AutoridadesCertificantes.BANCO_CENTRAL.getC().equals(x500emisor.getC()) && x500sujeto.getO().contains(AutoridadesCertificantes.BANCO_CENTRAL.getO()) && AutoridadesCertificantes.BANCO_CENTRAL.getC().equals(x500sujeto.getC())) {
-
-                    if (certificado.getKeyUsage()[0] || certificado.getKeyUsage()[1]) {
-                        aliasSeleccion = aliasKey;
-                        break;
-                    }
-                }
-                continue;
-            }
-            if (tokenSeleccionado.equals(TokensValidos.ANF1) && x500emisor.getCN().contains(AutoridadesCertificantes.ANF.getCn())) {
-
-                if (AutoridadesCertificantes.ANF.getO().equals(x500emisor.getO()) && AutoridadesCertificantes.ANF.getC().equals(x500emisor.getC()) && AutoridadesCertificantes.ANF.getC().toLowerCase().equals(x500sujeto.getC())) {
+                if (AutoridadesCertificantes.ANF.getO().equals(x500emisor.getO())
+                        && AutoridadesCertificantes.ANF.getC().equals(x500emisor.getC())
+                        && AutoridadesCertificantes.ANF.getC().toLowerCase().equals(x500sujeto.getC())) {
 
                     if (certificado.getKeyUsage()[0] || certificado.getKeyUsage()[1]) {
                         aliasSeleccion = aliasKey;
@@ -403,9 +424,12 @@ public abstract class GenericXMLSignature {
                 }
                 continue;
             }
-            if (tokenSeleccionado.equals(TokensValidos.ANF1) && x500emisor.getCN().contains(AutoridadesCertificantes.ANF_ECUADOR_CA1.getCn())) {
+            if (tokenSelected.equals(TokensAvailables.ANF1)
+                    && x500emisor.getCN().contains(AutoridadesCertificantes.ANF_ECUADOR_CA1.getCn())) {
 
-                if (AutoridadesCertificantes.ANF_ECUADOR_CA1.getO().equals(x500emisor.getO()) && AutoridadesCertificantes.ANF_ECUADOR_CA1.getC().equals(x500emisor.getC()) && AutoridadesCertificantes.ANF_ECUADOR_CA1.getC().equals(x500sujeto.getC())) {
+                if (AutoridadesCertificantes.ANF_ECUADOR_CA1.getO().equals(x500emisor.getO())
+                        && AutoridadesCertificantes.ANF_ECUADOR_CA1.getC().equals(x500emisor.getC())
+                        && AutoridadesCertificantes.ANF_ECUADOR_CA1.getC().equals(x500sujeto.getC())) {
 
                     if (certificado.getKeyUsage()[0] || certificado.getKeyUsage()[1]) {
                         aliasSeleccion = aliasKey;
@@ -414,9 +438,12 @@ public abstract class GenericXMLSignature {
                 }
                 continue;
             }
-            if (tokenSeleccionado.equals(TokensValidos.KEY4_CONSEJO_JUDICATURA) && x500emisor.getCN().contains(AutoridadesCertificantes.CONSEJO_JUDICATURA.getCn())) {
+            if (tokenSelected.equals(TokensAvailables.KEY4_CONSEJO_JUDICATURA)
+                    && x500emisor.getCN().contains(AutoridadesCertificantes.CONSEJO_JUDICATURA.getCn())) {
 
-                if (x500emisor.getO().contains(AutoridadesCertificantes.CONSEJO_JUDICATURA.getO()) && AutoridadesCertificantes.CONSEJO_JUDICATURA.getC().equals(x500emisor.getC()) && AutoridadesCertificantes.CONSEJO_JUDICATURA.getC().equals(x500sujeto.getC())) {
+                if (x500emisor.getO().contains(AutoridadesCertificantes.CONSEJO_JUDICATURA.getO())
+                        && AutoridadesCertificantes.CONSEJO_JUDICATURA.getC().equals(x500emisor.getC())
+                        && AutoridadesCertificantes.CONSEJO_JUDICATURA.getC().equals(x500sujeto.getC())) {
 
                     if (certificado.getKeyUsage()[0] || certificado.getKeyUsage()[1]) {
                         aliasSeleccion = aliasKey;

@@ -26,6 +26,8 @@ import es.mityc.javasign.EnumFormatoFirma;
 import es.mityc.javasign.xml.refs.InternObjectToSign;
 import es.mityc.javasign.xml.refs.ObjectToSign;
 
+import java.io.File;
+
 /**
  *
  * @author jorjoluiso
@@ -59,20 +61,21 @@ public class XAdESBESSignature extends GenericXMLSignature {
      * Firma el archivo XML
      * </p>
      *
-     * @param urlArchivo
-     * @param nombreArchivo
+     * @param archivo
      * @param urlOutArchivo
      * @return 
      */
-    public boolean firmar(String urlArchivo,String nombreArchivo,String urlOutArchivo,String PKCS12_RESOURCE,String PKCS12_PASSWORD) {
+    public boolean sign(File archivo, String urlOutArchivo,
+                        String PKCS12_RESOURCE, String PKCS12_PASSWORD,
+                        TokensAvailables token) {
         XAdESBESSignature signature = new XAdESBESSignature();
-        signature.RESOURCE_TO_SIGN=urlArchivo;
-        signature.SIGN_FILE_NAME=nombreArchivo;
+        signature.RESOURCE_TO_SIGN=archivo.getAbsolutePath();
+        signature.SIGN_FILE_NAME=archivo.getName();
         
         signature.setOUTPUT_DIRECTORY(urlOutArchivo);
         signature.PKCS12_RESOURCE=PKCS12_RESOURCE;
         signature.PKCS12_PASSWORD=PKCS12_PASSWORD;
-        return signature.execute();
+        return signature.execute(token);
         
     }
 
