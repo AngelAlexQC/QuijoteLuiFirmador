@@ -2,13 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/data/git/QuijoteLuiFirmador/src/com/quijotelui/firmador/Main.java</file>
-            <file>file:/data/git/QuijoteLuiFirmador/build.xml</file>
-            <file>file:/data/git/QuijoteLuiFirmador/src/com/quijotelui/firmador/GenericXMLSignature.java</file>
-            <file>file:/data/git/QuijoteLuiFirmador/src/com/quijotelui/firmador/XAdESBESSignature.java</file>
-            <file>file:/data/git/QuijoteLuiFirmador/src/com/quijotelui/firmador/PassStoreKS.java</file>
-            <file>file:/data/git/QuijoteLuiFirmador/README.md</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

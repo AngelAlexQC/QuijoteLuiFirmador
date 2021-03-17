@@ -137,7 +137,6 @@ public abstract class GenericXMLSignature {
 
             // Obtencion del certificado para firmar. Utilizaremos el primer
             // certificado del almacen.
-
             X509Certificate certificate = (X509Certificate) ks.getCertificate(aliaskey);
             if (certificate == null) {
                 System.err.println("No existe ningún certificado para firmar");
@@ -373,26 +372,36 @@ public abstract class GenericXMLSignature {
             if ((tokenSelected.equals(TokensAvailables.SD_BIOPASS)
                     || tokenSelected.equals(TokensAvailables.SD_EPASS3000))
                     && (x500emisor.getCN().contains(AutoridadesCertificantes.SECURITY_DATA.getCn())
-                    || x500emisor.getCN().contains(AutoridadesCertificantes.SECURITY_DATA_SUB_1.getCn()))) {
-                         if (AutoridadesCertificantes.SECURITY_DATA.getO().equals(x500emisor.getO())
-                                 && AutoridadesCertificantes.SECURITY_DATA.getC().equals(x500emisor.getC())
-                                 && AutoridadesCertificantes.SECURITY_DATA.getO().equals(x500sujeto.getO())
-                                 && AutoridadesCertificantes.SECURITY_DATA.getC().equals(x500sujeto.getC())) {
-                             if (certificado.getKeyUsage()[0]) {
-                                     aliasSeleccion = aliasKey;
-                                     break;
-                                   }
-                             }
-                         if (AutoridadesCertificantes.SECURITY_DATA_SUB_1.getO().equals(x500emisor.getO())
-                                 && AutoridadesCertificantes.SECURITY_DATA_SUB_1.getC().equals(x500emisor.getC())
-                                 && AutoridadesCertificantes.SECURITY_DATA_SUB_1.getO().equals(x500sujeto.getO())
-                                 && AutoridadesCertificantes.SECURITY_DATA_SUB_1.getC().equals(x500sujeto.getC())) {
-                             if (certificado.getKeyUsage()[0]) {
-                                 aliasSeleccion = aliasKey;
-                                 break;
-                             }
-                         }
-                         continue;
+                    || x500emisor.getCN().contains(AutoridadesCertificantes.SECURITY_DATA_SUB_1.getCn())
+                    || x500emisor.getCN().contains(AutoridadesCertificantes.SECURITY_DATA_SUB_2.getCn()))) {
+                if (AutoridadesCertificantes.SECURITY_DATA.getO().equals(x500emisor.getO())
+                        && AutoridadesCertificantes.SECURITY_DATA.getC().equals(x500emisor.getC())
+                        && AutoridadesCertificantes.SECURITY_DATA.getO().equals(x500sujeto.getO())
+                        && AutoridadesCertificantes.SECURITY_DATA.getC().equals(x500sujeto.getC())) {
+                    if (certificado.getKeyUsage()[0]) {
+                        aliasSeleccion = aliasKey;
+                        break;
+                    }
+                }
+                if (AutoridadesCertificantes.SECURITY_DATA_SUB_1.getO().equals(x500emisor.getO())
+                        && AutoridadesCertificantes.SECURITY_DATA_SUB_1.getC().equals(x500emisor.getC())
+                        && AutoridadesCertificantes.SECURITY_DATA_SUB_1.getO().equals(x500sujeto.getO())
+                        && AutoridadesCertificantes.SECURITY_DATA_SUB_1.getC().equals(x500sujeto.getC())) {
+                    if (certificado.getKeyUsage()[0]) {
+                        aliasSeleccion = aliasKey;
+                        break;
+                    }
+                }
+                if (AutoridadesCertificantes.SECURITY_DATA_SUB_2.getO().equals(x500emisor.getO()) 
+                        && AutoridadesCertificantes.SECURITY_DATA_SUB_2.getC().equals(x500emisor.getC()) 
+                        && AutoridadesCertificantes.SECURITY_DATA_SUB_2.getO().equals(x500sujeto.getO()) 
+                        && AutoridadesCertificantes.SECURITY_DATA_SUB_2.getC().equals(x500sujeto.getC())) {
+                    if (certificado.getKeyUsage()[0]) {
+                        aliasSeleccion = aliasKey;
+                        break;
+                    }
+                }
+                continue;
             }
             if (tokenSelected.equals(TokensAvailables.BCE_ALADDIN)
                     || (tokenSelected.equals(TokensAvailables.BCE_IKEY2032)

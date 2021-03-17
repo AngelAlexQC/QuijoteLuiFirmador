@@ -20,7 +20,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="797e870b-7e7e-44eb-ab62-b604083722ef" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nbproject/build-impl.xml" beforeDir="false" afterPath="$PROJECT_DIR$/nbproject/build-impl.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nbproject/genfiles.properties" beforeDir="false" afterPath="$PROJECT_DIR$/nbproject/genfiles.properties" afterDir="false" />
@@ -29,9 +28,6 @@
       <change beforePath="$PROJECT_DIR$/nbproject/project.properties" beforeDir="false" afterPath="$PROJECT_DIR$/nbproject/project.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/quijotelui/firmador/AutoridadesCertificantes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/quijotelui/firmador/AutoridadesCertificantes.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/quijotelui/firmador/GenericXMLSignature.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/quijotelui/firmador/GenericXMLSignature.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/quijotelui/firmador/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/quijotelui/firmador/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/quijotelui/firmador/TokensValidos.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/quijotelui/firmador/TokensAvailables.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/quijotelui/firmador/XAdESBESSignature.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/quijotelui/firmador/XAdESBESSignature.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +50,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
