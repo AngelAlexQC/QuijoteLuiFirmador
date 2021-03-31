@@ -7,12 +7,17 @@ de crédito y notas de débito de Ecuador.
 
 ### Para compilar y generar el archivo QuijoteLuiFirmador-2.1.jar
 ```
-$ ant
+ant
 
 ```
-### Para subir al repositorio Maven Local
+### Comando en terminal para subir al repositorio Maven Local (Linux\Mac)
 ```
-$ mvn install:install-file -Dfile=./dist/QuijoteLuiFirmador-2.1.jar -DgroupId=com.quijotelui.firmador -DartifactId=QuijoteLuiFirmador -Dversion=2.1 -Dpackaging=jar
+mvn install:install-file -Dfile=./dist/QuijoteLuiFirmador-2.1.jar -DgroupId=com.quijotelui.firmador -DartifactId=QuijoteLuiFirmador -Dversion=2.1 -Dpackaging=jar
+```
+### Comando en terminal para subir al repositorio Maven Local (Windows)
+```
+cd .\dist\
+mvn install:install-file "-Dfile=QuijoteLuiFirmador-2.1.jar" "-DgroupId=com.quijotelui.firmador" "-DartifactId=QuijoteLuiFirmador" "-Dversion=2.1" "-Dpackaging=jar"
 ```
 
 #### Documentación
