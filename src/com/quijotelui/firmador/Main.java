@@ -48,5 +48,14 @@ public class Main {
                 PKCS12_RESOURCE,
                 PKCS12_PASSWORD,
                 TokensAvailables.SD_EPASS3000);
+
+        /*
+        Para firmar con un certificado emitido por el Consejo de la Judicatura
+        */
+        xadesBesFirma.sign(archivo,
+                urlOutArchivo,
+                PKCS12_RESOURCE,
+                PKCS12_PASSWORD,
+                TokensAvailables.KEY4_CONSEJO_JUDICATURA);
     }
 }
