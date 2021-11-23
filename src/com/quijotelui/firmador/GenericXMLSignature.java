@@ -118,13 +118,13 @@ public abstract class GenericXMLSignature {
 
             ks = KeyStore.getInstance(store);
             if (store == "Windows-MY") {
+                System.out.println("Windows-MY");
                 ks.load(this.getClass().getResourceAsStream(PKCS12_RESOURCE), PKCS12_PASSWORD.toCharArray());
                 ks.load(null, null);
                 storeManager = new KSStore(ks, new PassStoreKS(PKCS12_PASSWORD));
             } else if (store.equals("pkcs12")) {
+                System.out.println("pkcs12");
                 ks.load(new FileInputStream(PKCS12_RESOURCE), PKCS12_PASSWORD.toCharArray());
-                //ks.load(this.getClass().getResourceAsStream(PKCS12_RESOURCE), PKCS12_PASSWORD.toCharArray());
-                ks.load(null, null);
                 storeManager = new KSStore(ks, new PassStoreKS(PKCS12_PASSWORD));
             }
 

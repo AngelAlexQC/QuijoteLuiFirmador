@@ -61,18 +61,22 @@ public class XAdESBESSignature extends GenericXMLSignature {
      * Firma el archivo XML
      * </p>
      *
-     * @param archivo
-     * @param urlOutArchivo
+     * @param archivo String
+     * 
      * @return 
      */
-    public boolean sign(File archivo, String urlOutArchivo,
+    public boolean sign(File archivo,
                         String PKCS12_RESOURCE, String PKCS12_PASSWORD,
                         TokensAvailables token) {
         XAdESBESSignature signature = new XAdESBESSignature();
         signature.RESOURCE_TO_SIGN=archivo.getAbsolutePath();
         signature.SIGN_FILE_NAME=archivo.getName();
-        
-        signature.setOUTPUT_DIRECTORY(urlOutArchivo);
+        // If folder not exists, create it
+        File folder = new File("."+File.separator+"signed");
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+        signature.setOUTPUT_DIRECTORY("."+File.separator+"signed");
         signature.PKCS12_RESOURCE=PKCS12_RESOURCE;
         signature.PKCS12_PASSWORD=PKCS12_PASSWORD;
         return signature.execute(token);
